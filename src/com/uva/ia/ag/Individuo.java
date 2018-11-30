@@ -17,15 +17,15 @@ public class Individuo implements Comparable<Individuo> {
     private Tabuleiro tabuleiro;
 
     public Individuo(Tabuleiro t){
-        this.tabuleiro = new Tabuleiro(t.getTamanho(), t.getQtdDeMarcos(), t.getEntrada(), t.getSaida(), t.getParedes());
+        this.tabuleiro = new Tabuleiro(t.getTabuleiro(), t.getTamanho(), t.getQtdDeMarcos(), t.getEntrada(), t.getSaida(), t.getParedes());
         init(0);
     }
 
     public Individuo(Tabuleiro t, List<Point> cromossoma) {
-        this.tabuleiro = new Tabuleiro(t.getTamanho(), t.getQtdDeMarcos(), t.getEntrada(), t.getSaida(), t.getParedes());
+        this.tabuleiro = new Tabuleiro(t.getTabuleiro(), t.getTamanho(), t.getQtdDeMarcos(), t.getEntrada(), t.getSaida(), t.getParedes());
         this.cromossoma = cromossoma;
         calculaAcidentes();
-        calculaScore(0, 0.0);
+        calculaScore();
     }
 
     public List<Point> getCromossoma() {
@@ -49,7 +49,7 @@ public class Individuo implements Comparable<Individuo> {
     public void setCromossoma(int i, Point p) {
         this.cromossoma.add(i, p);
         calculaAcidentes();
-        calculaScore(0, 0.0);
+        calculaScore();
     }
 
     @Override
@@ -65,7 +65,7 @@ public class Individuo implements Comparable<Individuo> {
 
         if(count > tabuleiro.getQtdDeMarcos()) {
             calculaAcidentes();
-            calculaScore(0, 0.0);
+            calculaScore();
             return;
         }
 
@@ -108,25 +108,15 @@ public class Individuo implements Comparable<Individuo> {
         return (A.x - C.x)*(A.y - C.y) == (C.x - B.x)*(C.y - B.y);
     }
 
-    private void calculaScore(int count, double tmp) {
+    private void calculaScore() {
+        int tmp = 0;
 
-        if(count < tabuleiro.getQtdDeMarcos()) {
-            tmp += cromossoma.get(count).
-                    distance(tabuleiro.getSaida());
-            tmp += quantidadeDeAcidentes * 1000;
-            score = tmp;
-            return;
+        for(int i = 0; i < cromossoma.size()-1; i++) {
+            tmp += cromossoma.get(i).
+                    distance(cromossoma.get(i+1));
         }
+        tmp += quantidadeDeAcidentes * 1000;
 
-        if(count == 0) {
-            tmp += tabuleiro.getEntrada().
-                    distance(cromossoma.get(count));
-        } else {
-            tmp += cromossoma.get(count).
-                    distance(cromossoma.get(count+1));
-        }
-
-        count++;
-        calculaScore(count, tmp);
+        score = tmp;
     }
 }
